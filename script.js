@@ -1,3 +1,8 @@
+const container = document.querySelector('#container');
+const addBook = document.querySelector('#add-book');
+const detailsContainer = document.querySelector('#details-container');
+const input = document.getElementsByTagName('input');
+
 let myLibrary = [];
 
 function Book(title, author, pages, read) {
@@ -7,8 +12,12 @@ function Book(title, author, pages, read) {
     this.read = read;
 }
 
-Book.prototype.info = function() {
-    return `${this.title} by ${this.author}, ${this.pages} pages, ${this.read}`;
+Book.prototype.toggleStatus = function() {
+    if(this.read === 'Read') {
+        this.read = 'Not read';
+    } else {
+        this.read = 'Read';
+    }
 }
 
 function addBookToLibrary() {
@@ -16,17 +25,20 @@ function addBookToLibrary() {
     const author = document.querySelector('#author');
     const pages = document.querySelector('#pages');
     const read = document.querySelector('#read');
+    if(read.checked) {
+        read.value = 'Read';
+    } else {
+        read.value = 'Not read';
+    }
     const newBook = new Book(title.value, author.value, pages.value, read.value);
     myLibrary.push(newBook);
 }
-
-const container = document.querySelector('#container');
 
 function displayBooks() {
     for(let i = 0; i < myLibrary.length; i++) {
         if(container.childElementCount === i) {
             const bookCard = document.createElement('div');
-            bookCard.setAttribute('style', 'display:inline-block; margin: 20px; height: 200px; width: 200px; background-color: red');
+            bookCard.setAttribute('style', 'margin: 20px; height: 220px; width: 200px;');
             const bookTitle = document.createElement('h2');
             bookTitle.textContent = myLibrary[i].title;
             const bookDetails = document.createElement('ul');
@@ -39,59 +51,72 @@ function displayBooks() {
             bookDetails.appendChild(bookAuthor);
             bookDetails.appendChild(bookPages);
             bookDetails.appendChild(bookRead);
+            const remove = document.createElement('button');
+            remove.id = 'remove';
+            remove.textContent = 'Remove';
+            remove.addEventListener('click', () => {
+                myLibrary.forEach(book => {
+                    if(book.title === bookTitle.textContent) {
+                        myLibrary.splice(myLibrary.indexOf(book), 1);
+                    }
+                });
+                container.removeChild(bookCard);
+            });
+            const status = document.createElement('button');
+            status.id = 'status';
+            if(bookRead.textContent === 'Read') {
+                status.textContent = 'Not read';
+            } else {
+                status.textContent = 'Read';
+            }
+            status.addEventListener('click', () => {
+                myLibrary[i].toggleStatus();
+                bookRead.textContent = myLibrary[i].read;
+                if(status.textContent === 'Read') {
+                    status.textContent = 'Not read';
+                } else {
+                    status.textContent = 'Read';
+                }
+            });
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.id = 'buttons-container';
+            buttonsContainer.appendChild(remove);
+            buttonsContainer.appendChild(status);
             bookCard.appendChild(bookTitle);
             bookCard.appendChild(bookDetails);
+            bookCard.appendChild(buttonsContainer)
             container.appendChild(bookCard);
         }
     };
 }
 
-const theHobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'not read yet');
-const harryPotter = new Book('Harry Potter', 'J.K. Rowling', 500, 'read');
-const percyJackson = new Book('Percy Jackson', 'Rick Riordan', 400, 'read');
+function toggleRequired(detailsClass) {
+    if(detailsClass === 'details active') {
+        for(i = 0; i < input.length; i++){
+            if(input[i].type !== 'checkbox') {
+                input[i].required = true;
+            }
+        }
+    } else {
+        for(i = 0; i < input.length; i++){
+            input[i].required = false;
+        }
+    }
+}
 
-myLibrary.push(theHobbit);
-myLibrary.push(harryPotter);
-myLibrary.push(percyJackson);
-
-// displayBooks();
-
-const addBook = document.querySelector('#addBook');
+function submitForm() {
+    addBookToLibrary();
+    displayBooks();
+    detailsContainer.classList.toggle('active');
+    toggleRequired(detailsContainer.className);
+    if(detailsContainer.className === 'details') {
+        for(i = 0; i < input.length; i++) {
+            input[i].value = '';
+        }
+    }
+}
 
 addBook.addEventListener('click', () => {
-    const addTitle = document.createElement('input');
-    addTitle.id = 'title';
-    addTitle.name = 'title';
-    addTitle.placeholder = 'Title';
-    const addAuthor = document.createElement('input');
-    addAuthor.id = 'author';
-    addAuthor.name = 'author';
-    addAuthor.placeholder = 'Author';
-    const addPages = document.createElement('input');
-    addPages.id = 'pages';
-    addPages.name = 'pages';
-    addPages.placeholder = 'Pages';
-    const addRead = document.createElement('input');
-    addRead.id = 'read';
-    addRead.name = 'read';
-    addRead.placeholder = 'Read';
-    const submit = document.createElement('button');
-    submit.type = 'submit';
-    submit.textContent = 'Submit';
-    submit.addEventListener('click', () => {
-        addBookToLibrary();
-        container.removeChild(addTitle);
-        container.removeChild(addAuthor);
-        container.removeChild(addPages);
-        container.removeChild(addRead);
-        container.removeChild(submit);
-        displayBooks();
-    });
-    container.appendChild(addTitle);
-    container.appendChild(addAuthor);
-    container.appendChild(addPages);
-    container.appendChild(addRead);
-    container.appendChild(submit);
+    detailsContainer.classList.toggle('active');
+    toggleRequired(detailsContainer.className);
 });
-
-displayBooks();
