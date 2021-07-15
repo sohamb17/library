@@ -20,6 +20,16 @@ Book.prototype.toggleStatus = function() {
     }
 }
 
+if(!localStorage.getItem('myLibrary')) {
+    populateStorage();
+} else {
+    displayBooks();
+}
+
+function populateStorage() {
+    localStorage.setItem('myLibrary', JSON.stringify(myLibrary));
+}
+
 function addBookToLibrary() {
     const title = document.querySelector('#title');
     const author = document.querySelector('#author');
@@ -31,10 +41,15 @@ function addBookToLibrary() {
         read.value = 'Not read';
     }
     const newBook = new Book(title.value, author.value, pages.value, read.value);
+    myLibrary = JSON.parse(localStorage.getItem('myLibrary'));
+    myLibrary.forEach(book => Object.setPrototypeOf(book, Book.prototype));
     myLibrary.push(newBook);
+    populateStorage();
 }
 
 function displayBooks() {
+    myLibrary = JSON.parse(localStorage.getItem('myLibrary'));
+    myLibrary.forEach(book => Object.setPrototypeOf(book, Book.prototype));
     for(let i = 0; i < myLibrary.length; i++) {
         if(container.childElementCount === i) {
             const bookCard = document.createElement('div');
@@ -58,6 +73,7 @@ function displayBooks() {
                 myLibrary.forEach(book => {
                     if(book.title === bookTitle.textContent) {
                         myLibrary.splice(myLibrary.indexOf(book), 1);
+                        populateStorage();
                     }
                 });
                 container.removeChild(bookCard);
@@ -71,6 +87,7 @@ function displayBooks() {
             }
             status.addEventListener('click', () => {
                 myLibrary[i].toggleStatus();
+                populateStorage();
                 bookRead.textContent = myLibrary[i].read;
                 if(status.textContent === 'Read') {
                     status.textContent = 'Not read';
