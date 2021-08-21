@@ -5,20 +5,22 @@ const input = document.getElementsByTagName('input');
 
 let myLibrary = [];
 
-function Book(title, author, pages, read) {
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.read = read;
-}
-
-Book.prototype.toggleStatus = function() {
-    if(this.read === 'Read') {
-        this.read = 'Not read';
-    } else {
-        this.read = 'Read';
+class Book {
+    constructor(title, author, pages, read) {
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.read = read;
+    }
+    toggleStatus() {
+        if (this.read === 'Read') {
+            this.read = 'Not read';
+        } else {
+            this.read = 'Read';
+        }
     }
 }
+
 
 if(!localStorage.getItem('myLibrary')) {
     populateStorage();
